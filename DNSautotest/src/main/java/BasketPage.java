@@ -1,15 +1,14 @@
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.junit.Assert;
 
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
-import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
-public class BasketPage extends PageSettings{
+public class BasketPage extends PageSettings {
     Integer temp;
     public BasketPage() {
         super();
@@ -38,7 +37,7 @@ public class BasketPage extends PageSettings{
     @FindBy(xpath = "//div[@class='total-amount__info-block']/descendant::span")
     WebElement sum;
 
-    @FindBy(xpath = "//i[@class='count-buttons__icon-plus']")
+    @FindBy(xpath = "//div[@class='count-buttons']")
     private
     WebElement plus;
 
@@ -46,33 +45,51 @@ public class BasketPage extends PageSettings{
     private
     WebElement itemBack;
 
+    @FindBy(xpath = "//input[@class='count-buttons__input']")
+    private
+    WebElement amount;
+
     public void checkGuarantee() {
         Assert.assertTrue(check.isEnabled());
     }
 
     public void checkSum(ItemPage itemPage) {
+        wait.until(ExpectedConditions.visibilityOf(item1));
+        wait.until(ExpectedConditions.visibilityOf(item2));
         Assert.assertTrue(itemPage.getBefore().intValue()==itemPage.toNumber(item1).intValue());
         Assert.assertTrue(itemPage.getNewItem().intValue()==itemPage.toNumber(item2).intValue());
         Assert.assertTrue(itemPage.getNewItem().intValue()+itemPage.getBefore().intValue()+itemPage.getUpdated().intValue()==itemPage.toNumber(sum).intValue());
+        temp = itemPage.toNumber(sum);
+
 
     }
     public void removeItem() {
         removeItem.click();
     }
      public void checkAfterRemove(ItemPage itemPage){
-        int sum1 = itemPage.getBefore()+itemPage.getUpdated();
-        int sum2 = itemPage.toNumber(sum);
+         Function<? super WebDriver, Object> isPriceChanged = (ExpectedCondition<Object>) webDriver -> !itemPage.toNumber(sum).equals(temp);
+         wait.until(isPriceChanged);
+         int sum1 = itemPage.getBefore()+itemPage.getUpdated();
+         int sum2 = itemPage.toNumber(sum);
 
         Assert.assertTrue(sum1==sum2);
      }
 
      public void addItems(Integer count) {
-         for (int i = 0; i == count; i++) {
+         for (int i = 0; i == count ; i++) {
              plus.click();
          }
      }
      public void checkNew(ItemPage itemPage) {
         temp = ((itemPage.getBefore()*3)+(itemPage.getUpdated()*3));
+         System.out.println(temp);
+         Function<? super WebDriver, Object> isAmountChanged = new ExpectedCondition<Object>() {
+             @Override
+             public Boolean apply(WebDriver webDriver) {
+                 return  temp.equals(itemPage.toNumber(sum));
+             }
+         };
+         wait.until(isAmountChanged);
 
         Assert.assertTrue(temp.intValue()==itemPage.toNumber(sum).intValue());
      }
