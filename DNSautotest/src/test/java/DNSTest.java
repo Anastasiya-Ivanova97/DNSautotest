@@ -3,13 +3,13 @@ import org.junit.Test;
 
 public class DNSTest {
     @Before
-    public void start() throws InterruptedException {
+    public void start() {
         Initialization.initialize();
     }
     @Test
-    public void dnsTest() throws InterruptedException {
+    public void dnsTest()  {
         StartPage startPage = new StartPage();
-        Thread.sleep(3000);
+      
         startPage.search("playstation");
 
         SearchResultPage searchResultPage = new SearchResultPage();
@@ -22,7 +22,7 @@ public class DNSTest {
         itemPage.buyAndSearchAnotherItem("detroit");
         itemPage.setNewItem();
         itemPage.buy();
-        //itemPage.checkTotalPrice();
+        itemPage.checkTotalPrice();
         itemPage.goToBasket();
         BasketPage basketPage = new BasketPage();
         basketPage.checkGuarantee();
